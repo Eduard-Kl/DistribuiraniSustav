@@ -8,8 +8,8 @@ public class Prodavaonica extends Process implements Election {
         next = (myId + 1) % N;
     }
     public synchronized String nadiProizvod(){
-	while (p.equals("")) myWait();
-	return p;
+	   while (p.equals("")) myWait();
+	   return p;
     }
     /*public synchronized void handleMsg(Msg m, int src, String tag) {
         int j = m.getMessageInt(); // get the number
@@ -35,14 +35,11 @@ public class Prodavaonica extends Process implements Election {
 		} 
 		else {	
 			notify();		
-		   	sendMsg(next, tag, str);
-				
+		   	sendMsg(next, tag, str);				
 		}
+	}
 
-	    }
-
-    public synchronized void startElection(String proizvod) {
-   
+    public synchronized void startElection(String proizvod) {   
         sendMsg(next, String.valueOf(myId), proizvod);
     }
 }

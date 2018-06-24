@@ -1,25 +1,29 @@
 import java.util.concurrent.TimeUnit;
 import java.util.Scanner;
 import java.util.*;
+
 public class Prodavaonica extends Process implements Election {
+
     String p="";
     Dictionary<String, Integer> proizvodi;
     int next;
     String name;
     Scanner reader = new Scanner(System.in);
     boolean awake = false;
+
     public Prodavaonica(Linker initComm,Dictionary<String, Integer> proi) {
         super(initComm);
         next = (myId + 1) % N;
-	this.name="Prodavaonica"+String.valueOf(myId);
-	this.proizvodi=proi;
+	       this.name="Prodavaonica"+String.valueOf(myId);
+	       this.proizvodi=proi;
     }
     public synchronized String nadiProizvod(){
 	   while (p.equals("")) myWait();
 	   return p;
     }
 
-    /*public synchronized void handleMsg(Msg m, int src, String tag) {
+    /*
+    public synchronized void handleMsg(Msg m, int src, String tag) {
         int j = m.getMessageInt(); // get the number
         if (tag.equals("election")) {
             if (j > number)
@@ -42,7 +46,7 @@ public class Prodavaonica extends Process implements Election {
 	}
 
 	public synchronized void handleMsg(Msg m, int src, String tag) {
-		String poruka = m.getMessage().substring(1); // problem parisranja...doraditi
+    String poruka = m.getMessage().substring(1); // problem parisranja...doraditi
 		String poruka_proizvod=parsiraj(poruka);
 		if (tag.equals(String.valueOf(myId))) {
 			System.out.println("Poruka se vratila: "+poruka);
@@ -50,7 +54,7 @@ public class Prodavaonica extends Process implements Election {
 			notify();
 		}
 		else {
-			System.out.println("Trazi proizvod: "+poruka_proizvod);
+			System.out.println("Traži proizvod: "+poruka_proizvod);
 			if(proizvodi.get(poruka_proizvod)!=null && proizvodi.get(poruka_proizvod)>0){
 				System.out.println("Nađen: "+poruka_proizvod);
 				poruka=poruka+name+" "+proizvodi.get(poruka_proizvod)+"?";
@@ -67,7 +71,11 @@ public class Prodavaonica extends Process implements Election {
       proizvod = reader.nextLine();
     if(proizvodi.get(proizvod) != null){
       int brojPreostalih=proizvodi.get(proizvod);
-      System.out.print("Kolicina: ");
+      if(brojPreostalih == 0){
+        System.out.print("Nema dovoljno artikala.");
+        return;
+      }
+      System.out.print("Količina: ");
       int kolicina = reader.nextInt();
       if(kolicina<=brojPreostalih && kolicina>0){
         System.out.println("Prodano: "+proizvod+" "+kolicina);
@@ -75,12 +83,10 @@ public class Prodavaonica extends Process implements Election {
         return;
       }
       else{
-        System.out.println("Nema dovoljno kolicine");
+        System.out.println("Nema dovoljno artikala.");
         return;
       }
     }
-    else
-      return;
   }
 
   public synchronized void dodajArtikl(){
@@ -88,8 +94,8 @@ public class Prodavaonica extends Process implements Election {
     System.out.print("Naziv artikla: ");
     while(proizvod.equals(""))
       proizvod = reader.nextLine();
-    System.out.print("Kolicina: ");
-    int kolicina= reader.nextInt();
+    System.out.print("Količina: ");
+    int kolicina = reader.nextInt();
     proizvodi.put(proizvod, kolicina);
   }
 
@@ -110,7 +116,7 @@ public class Prodavaonica extends Process implements Election {
   }
 
     public synchronized void startElection(String proizvod) {
-	p="";
-        sendMsg(next, String.valueOf(myId), proizvod);
+      p="";
+      sendMsg(next, String.valueOf(myId), proizvod);
     }
 }

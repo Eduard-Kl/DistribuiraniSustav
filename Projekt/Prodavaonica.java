@@ -1,6 +1,13 @@
 import java.util.concurrent.TimeUnit;
 import java.util.Scanner;
 import java.util.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class Prodavaonica extends Process implements Election {
 
@@ -10,12 +17,14 @@ public class Prodavaonica extends Process implements Election {
     String name;
     Scanner reader = new Scanner(System.in);
     boolean awake = false;
+    String datoteka = "";
 
-    public Prodavaonica(Linker initComm,Dictionary<String, Integer> proi) {
-        super(initComm);
-        next = (myId + 1) % N;
-	       this.name="Prodavaonica"+String.valueOf(myId);
-	       this.proizvodi=proi;
+    public Prodavaonica(Linker initComm, Dictionary<String, Integer> proi) {
+      super(initComm);
+      next = (myId + 1) % N;
+      this.name = "Prodavaonica" + String.valueOf(myId);
+      this.proizvodi = proi;
+      this.datoteka = "./Dostupni proizvodi/ListaDostupnihProizvoda" + String.valueOf(myId) + ".csv";
     }
     public synchronized String nadiProizvod(){
 	   while (p.equals("")) myWait();
@@ -72,14 +81,15 @@ public class Prodavaonica extends Process implements Election {
     if(proizvodi.get(proizvod) != null){
       int brojPreostalih=proizvodi.get(proizvod);
       if(brojPreostalih == 0){
-        System.out.print("Nema dovoljno artikala.");
+        System.out.println("Nema dovoljno artikala.");
         return;
       }
       System.out.print("Količina: ");
       int kolicina = reader.nextInt();
       if(kolicina<=brojPreostalih && kolicina>0){
         System.out.println("Prodano: "+proizvod+" "+kolicina);
-        proizvodi.put(proizvod, proizvodi.get(proizvod) - kolicina);
+        update("ukloni", proizvod, kolicina);
+        proizvodi.put(proizvod, proizvodi.get(proizvod) - kolicina);        
         return;
       }
       else{
@@ -97,6 +107,7 @@ public class Prodavaonica extends Process implements Election {
     System.out.print("Količina: ");
     int kolicina = reader.nextInt();
     proizvodi.put(proizvod, kolicina);
+    update("dodaj", proizvod, kolicina);
   }
 
 	public synchronized void ostaleProdavaonice(String upit){ //trazenje prozvoda
@@ -113,6 +124,65 @@ public class Prodavaonica extends Process implements Election {
     if(proizvodi.get(proizvod)==null)
       return 0;
     return proizvodi.get(proizvod);
+  }
+
+  public synchronized void update(String izbor, String proizvod, int promjena){
+
+    // Dodaj novi proizvod u listu dostupnih
+    if(izbor == "dodaj"){
+      try{
+        // Otvori datoteku u append modu
+        FileWriter pisac = new FileWriter(datoteka, true);
+        pisac.write(proizvod + "," + promjena + "\n");
+        pisac.close();
+      }
+      catch(FileNotFoundException e){
+        e.printStackTrace();
+      }
+      catch(IOException e){
+        e.printStackTrace();
+      }
+    }
+    // Ažuriraj postojeći proizvod
+    else{ // izbor == "ukloni"
+      try{
+        File ulaz = new File(datoteka);
+        File tempDatoteka = new File("./Dostupni proizvodi/ListaDostupnihProizvoda" + String.valueOf(myId) + "TEMP.csv");
+
+        BufferedReader citac = new BufferedReader(new FileReader(ulaz));
+        BufferedWriter pisac = new BufferedWriter(new FileWriter(tempDatoteka));
+
+        String linija = "", linijaIzbaci = proizvod + "," + String.valueOf(kolicinaProizvoda(proizvod)) + "\n";
+
+        // U TEMP datoteku ubaci sve linije osim one koja sadrži 'proizvod'
+        while((linija = citac.readLine()) != null){
+          String[] redak = linija.split(",");
+          if(!redak[0].equals(proizvod)){
+            pisac.write(linija + "\n");
+          }
+        }
+        pisac.close();
+
+        FileWriter pisac2 = new FileWriter(tempDatoteka, true);
+
+        // 'promjena' je broj kupljenih artikala
+        int novaKolicina = kolicinaProizvoda(proizvod) - promjena;
+
+        pisac2.write(proizvod + "," + novaKolicina + "\n");
+        pisac2.close();
+
+        citac.close();
+
+        // Izbriši originalnu datoteku, i preimenuj TEMP
+        tempDatoteka.renameTo(ulaz);
+      }
+      catch(FileNotFoundException e){
+        e.printStackTrace();
+      }
+      catch(IOException e){
+        e.printStackTrace();
+      }
+    }
   }
 
     public synchronized void startElection(String proizvod) {

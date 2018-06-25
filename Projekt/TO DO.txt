@@ -1,1 +1,0 @@
--Nakon što se ubaci novi proizvod, ažuriraj lokalnu .csv datoteku.

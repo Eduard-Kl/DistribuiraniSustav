@@ -2,7 +2,10 @@ import java.util.Scanner;
 import java.util.*;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
+import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class ProdavaonicaTester {
 
@@ -20,8 +23,7 @@ public class ProdavaonicaTester {
 		String linija = "";
 
 		// Proces čita samo svoju datoteku
-		String datoteka = "./Dostupni proizvodi/ListaDostupnihProizvoda" + myId + ".csv";
-
+		String datoteka = "./Dostupni proizvodi/ListaDostupnihProizvoda" + String.valueOf(myId) + ".csv";
 
 		// Učitavanje dostupnih proizvoda
 		try{
@@ -38,7 +40,7 @@ public class ProdavaonicaTester {
 		
 		
 		Linker comm = new Linker(args[0], myId, numProc);
-		Prodavaonica p = new Prodavaonica(comm,proizvodi);
+		Prodavaonica p = new Prodavaonica(comm, proizvodi);
 		for (int i = 0; i < numProc; i++){
 			if (i != myId);
 				(new ListenerThread(i, p)).start();
@@ -53,10 +55,10 @@ public class ProdavaonicaTester {
 			String trazeniProizvod = reader.nextLine();
 			//System.out.println("Proizvod: " + trazeniProizvod);
 
-			if(trazeniProizvod.equals("Kupi"))	//kupovina proizvoda
+			if(trazeniProizvod.equals("Kupi") || trazeniProizvod.equals("K") || trazeniProizvod.equals("k"))	//kupovina proizvoda
 				p.odradiKupnju();
 
-			else if(trazeniProizvod.equals("Ubaci"))	//dodavanje proizvoda
+			else if(trazeniProizvod.equals("Ubaci") || trazeniProizvod.equals("U") || trazeniProizvod.equals("u"))	//dodavanje proizvoda
 				p.dodajArtikl();
 
 			// Sadrži li dućan proizvod

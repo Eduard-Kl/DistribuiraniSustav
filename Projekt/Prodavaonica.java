@@ -73,7 +73,7 @@ public class Prodavaonica extends Process implements Election {
 		}
 	}
 
-  public synchronized void odradiKupnju(){  
+  public synchronized void odradiKupnju(){
     String proizvod="";
     System.out.print("Odaberi proizvod: ");
     while(proizvod.equals(""))
@@ -89,7 +89,7 @@ public class Prodavaonica extends Process implements Election {
       if(kolicina<=brojPreostalih && kolicina>0){
         System.out.println("Prodano: "+proizvod+" "+kolicina);
         update("ukloni", proizvod, kolicina);
-        proizvodi.put(proizvod, proizvodi.get(proizvod) - kolicina);        
+        proizvodi.put(proizvod, proizvodi.get(proizvod) - kolicina);
         return;
       }
       else{
@@ -105,7 +105,7 @@ public class Prodavaonica extends Process implements Election {
     while(proizvod.equals(""))
       proizvod = reader.nextLine();
     System.out.print("Količina: ");
-    int kolicina = reader.nextInt();
+    int kolicina = reader.nextInt()+kolicinaProizvoda(proizvod);
     proizvodi.put(proizvod, kolicina);
     update("dodaj", proizvod, kolicina);
   }
